@@ -1,6 +1,7 @@
 package puzzles
 
 import (
+	"arthur-fontaine/advent-of-code-2023/utils"
 	"fmt"
 	"os"
 	"strconv"
@@ -23,20 +24,12 @@ func get_first_digit(s string) (int, bool) {
 	return 0, false
 }
 
-func reverse(s string) string {
-	reversed_string := ""
-	for _, character := range s {
-		reversed_string = string(character) + reversed_string
-	}
-	return reversed_string
-}
-
 func get_last_digit(s string) (int, bool) {
-	return get_first_digit(reverse(s))
+	return get_first_digit(utils.Reverse(s))
 }
 
-func trebuchet() any {
-	input, err := os.ReadFile("resources/1_1/input.txt")
+func day1_part1() any {
+	input, err := os.ReadFile("resources/1/input.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -58,5 +51,5 @@ func trebuchet() any {
 }
 
 func init() {
-	RegisterPuzzle(1, 1, trebuchet)
+	RegisterPuzzle(1, 1, day1_part1)
 }
