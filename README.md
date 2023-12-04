@@ -5,3 +5,6 @@
 My solutions for the Advent of Code 2023 in Golang.
 
 https://adventofcode.com/2023/
+
+> [!NOTE]
+> This repository is not intended to provide clean code. I'm essentially taking advantage of AoC 2023 to learn and explore Golang.
