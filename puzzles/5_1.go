@@ -23,7 +23,7 @@ func (almanac_map AlmanacMap) get_destination(source int) int {
 }
 
 type Almanac struct {
-	seeds                   []int
+	seed_ranges             [][]int
 	seed_to_soil            AlmanacMap
 	soil_to_fertilizer      AlmanacMap
 	fetilizer_to_water      AlmanacMap
@@ -89,8 +89,14 @@ func parse_almanac_map(string_number_lists_str string) AlmanacMap {
 }
 
 func parse_almanac(input string) Almanac {
+	seed_flat_ranges := convert_string_number_list(get_almanac_part(input, "seeds"))
+	seed_ranges := [][]int{}
+	for i := 0; i < len(seed_flat_ranges); i += 2 {
+		seed_ranges = append(seed_ranges, []int{seed_flat_ranges[i], seed_flat_ranges[i] + seed_flat_ranges[i+1]})
+	}
+
 	almanac := Almanac{
-		seeds:                   convert_string_number_list(get_almanac_part(input, "seeds")),
+		seed_ranges:             seed_ranges,
 		seed_to_soil:            parse_almanac_map(get_almanac_part(input, "seed-to-soil map")),
 		soil_to_fertilizer:      parse_almanac_map(get_almanac_part(input, "soil-to-fertilizer map")),
 		fetilizer_to_water:      parse_almanac_map(get_almanac_part(input, "fertilizer-to-water map")),
@@ -123,8 +129,8 @@ func day5_part1() any {
 	almanac := parse_almanac(string(input))
 
 	lowest_location := -1
-	for _, seed := range almanac.seeds {
-		location := get_location_from_seed(almanac, seed)
+	for _, seed_range := range almanac.seed_ranges {
+		location := get_location_from_seed(almanac, seed_range[0])
 		if lowest_location == -1 || location < lowest_location {
 			lowest_location = location
 		}
