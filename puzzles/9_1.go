@@ -50,7 +50,7 @@ func get_pyramid(numbers []int) [][]int {
 	return pyramid
 }
 
-func ascend_pyramid(pyramid [][]int) [][]int {
+func ascend_pyramid_right(pyramid [][]int) [][]int {
 	for i := len(pyramid) - 1; i > 0; i-- {
 		if i == len(pyramid)-1 {
 			pyramid[i] = append(pyramid[i], 0)
@@ -80,9 +80,9 @@ func day9_part1() any {
 	sum_of_extrapolated_values := 0
 	for _, row := range rows {
 		pyramid := get_pyramid(row_to_number_list(row))
-		extrapolated_pyramid := ascend_pyramid(pyramid)
+		extrapolated_pyramid_by_right := ascend_pyramid_right(pyramid)
 
-		sum_of_extrapolated_values += extrapolated_pyramid[0][len(extrapolated_pyramid[0])-1]
+		sum_of_extrapolated_values += extrapolated_pyramid_by_right[0][len(extrapolated_pyramid_by_right[0])-1]
 	}
 
 	return sum_of_extrapolated_values
