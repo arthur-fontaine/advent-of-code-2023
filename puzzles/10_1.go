@@ -44,17 +44,46 @@ func get_adjacent_pipes(string_grid string, tile_row_index int, tile_column_inde
 
 	adjacent_pipes := []Pipe{}
 
-	for _, t := range []struct {
+	pipe, err := find_pipe_by_symbol(string(row_strings[tile_row_index][tile_column_index]))
+
+	type FindAdjacentPipesParameter struct {
 		condition        bool
 		row_index        int
 		column_index     int
 		adjacent_symbols []string
+	}
+
+	adjacent_symbols_mapping := []struct {
+		symbols                       []string
+		find_adjacent_pipes_parameter FindAdjacentPipesParameter
 	}{
-		{adjacent_symbols: top_adjacent_pipe_symbols, condition: tile_row_index > 0, row_index: tile_row_index - 1, column_index: tile_column_index},
-		{adjacent_symbols: bottom_adjacent_pipe_symbols, condition: tile_row_index < len(row_strings)-1, row_index: tile_row_index + 1, column_index: tile_column_index},
-		{adjacent_symbols: left_adjacent_pipe_symbols, condition: tile_column_index > 0, row_index: tile_row_index, column_index: tile_column_index - 1},
-		{adjacent_symbols: right_adjacent_pipe_symbols, condition: tile_column_index < len(row_strings[tile_row_index])-1, row_index: tile_row_index, column_index: tile_column_index + 1},
-	} {
+		{
+			symbols:                       top_adjacent_pipe_symbols,
+			find_adjacent_pipes_parameter: FindAdjacentPipesParameter{adjacent_symbols: bottom_adjacent_pipe_symbols, condition: tile_row_index < len(row_strings)-1, row_index: tile_row_index + 1, column_index: tile_column_index},
+		},
+		{
+			symbols:                       bottom_adjacent_pipe_symbols,
+			find_adjacent_pipes_parameter: FindAdjacentPipesParameter{adjacent_symbols: top_adjacent_pipe_symbols, condition: tile_row_index > 0, row_index: tile_row_index - 1, column_index: tile_column_index},
+		},
+		{
+			symbols:                       right_adjacent_pipe_symbols,
+			find_adjacent_pipes_parameter: FindAdjacentPipesParameter{adjacent_symbols: left_adjacent_pipe_symbols, condition: tile_column_index > 0, row_index: tile_row_index, column_index: tile_column_index - 1},
+		},
+		{
+			symbols:                       left_adjacent_pipe_symbols,
+			find_adjacent_pipes_parameter: FindAdjacentPipesParameter{adjacent_symbols: right_adjacent_pipe_symbols, condition: tile_column_index < len(row_strings[tile_row_index])-1, row_index: tile_row_index, column_index: tile_column_index + 1},
+		},
+	}
+
+	find_adjacent_pipes_parameters := []FindAdjacentPipesParameter{}
+
+	for _, v := range adjacent_symbols_mapping {
+		if err != nil || utils.ArrayIncludes(v.symbols, pipe.symbol) {
+			find_adjacent_pipes_parameters = append(find_adjacent_pipes_parameters, v.find_adjacent_pipes_parameter)
+		}
+	}
+
+	for _, t := range find_adjacent_pipes_parameters {
 		if t.condition {
 			adjacent_tile_string := string(row_strings[t.row_index][t.column_index])
 			adjacent_pipe, err := find_pipe_by_symbol(adjacent_tile_string)
