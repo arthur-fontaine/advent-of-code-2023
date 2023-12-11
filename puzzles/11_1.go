@@ -39,7 +39,9 @@ func normalize_space(space_string string) string {
 }
 
 type Space struct {
-	galaxies []Galaxy
+	galaxies                 []Galaxy
+	collapsed_row_indexes    []int
+	collapsed_column_indexes []int
 }
 
 type Galaxy struct {
