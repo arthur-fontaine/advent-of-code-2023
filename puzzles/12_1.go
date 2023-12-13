@@ -2,90 +2,68 @@ package puzzles
 
 import (
 	"arthur-fontaine/advent-of-code-2023/utils"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
 )
 
-type Spring struct {
-	raw     []string
-	by_size []int
-}
+type Spring [2]string
 
 func parse_spring(spring string) Spring {
 	spring_parts := strings.Split(spring, " ")
-
-	raw := strings.Split(spring_parts[0], "")
-	by_size, _ := utils.MapArray(strings.Split(spring_parts[1], ","), func(v string) (int, error) {
-		return strconv.Atoi(v)
-	})
-
-	return Spring{
-		raw:     raw,
-		by_size: by_size,
-	}
+	return Spring{spring_parts[0], spring_parts[1]}
 }
 
-func validate_spring(spring Spring) bool {
-	// All raw character should be not empty
-	if utils.ArrayIncludes(spring.raw, "") {
-		return false
+var cache_resolve_spring = map[string]int{}
+
+func count_resolve_spring_ways(spring []rune, groups []int, spring_index int, group_index int, current_group_index int) int {
+	// Mainly reimplementation of https://github.com/patrickarmengol/advent-of-code/blob/f357870c547c752696f8476455f0e0e19da6e490/2023/day12/solution.go#L13
+
+	cache_key := fmt.Sprintf("%q %v %d %d %d", spring, groups, spring_index, group_index, current_group_index)
+
+	if cached_result, ok := cache_resolve_spring[cache_key]; ok {
+		return cached_result
 	}
 
-	sizes := []int{}
+	if spring_index == len(spring) {
+		// When we reach the end of the spring
 
-	for _, character := range spring.raw {
-		if character == "#" {
-			if len(sizes) == 0 {
-				sizes = append(sizes, 0)
-			}
-
-			sizes[len(sizes)-1]++
-		} else if len(sizes) == 0 || sizes[len(sizes)-1] > 0 {
-			sizes = append(sizes, 0)
-		}
-	}
-
-	if sizes[len(sizes)-1] == 0 {
-		sizes = sizes[:len(sizes)-1]
-	}
-
-	return utils.ArraysAreSame(sizes, spring.by_size)
-}
-
-func get_spring_possibilities(spring Spring) []string {
-	possibilities := []string{}
-
-	var g = func(s string) {}
-	g = func(s string) {
-		if strings.Count(s, "?") == 0 {
-			possibilities = append(possibilities, s)
+		if group_index == len(groups) && current_group_index == 0 {
+			// When we iterated over all groupes and there is no group currently being iterated
+			return 1
+		} else if group_index == len(groups)-1 && current_group_index == groups[group_index] {
+			// When there is a group currently being iterated, but we iterated all this group
+			return 1
 		} else {
-			g(strings.Replace(s, "?", ".", 1))
-			g(strings.Replace(s, "?", "#", 1))
+			return 0
 		}
 	}
 
-	g(strings.Join(spring.raw, ""))
+	ways := 0
+	next_char := spring[spring_index]
 
-	return possibilities
-}
+	spring_index++
 
-func brute_force_resolve_spring(spring Spring) []Spring {
-	possibilities := get_spring_possibilities(spring)
-
-	working_springs := []Spring{}
-
-	for _, possibility := range possibilities {
-		new_spring := spring
-		new_spring.raw = strings.Split(possibility, "")
-
-		if validate_spring(new_spring) {
-			working_springs = append(working_springs, new_spring)
+	if next_char == '.' || next_char == '?' {
+		if current_group_index == 0 {
+			// There is no group currently being iterated, so we do not need to increment anythis
+			ways += count_resolve_spring_ways(spring, groups, spring_index, group_index, 0)
+		} else if current_group_index > 0 && group_index < len(groups) && groups[group_index] == current_group_index {
+			// There is a group currently being iterated. As there is a dot and the group is completed, we need to stop the iteration, and start iterating the next group
+			ways += count_resolve_spring_ways(spring, groups, spring_index, group_index+1, 0)
 		}
 	}
 
-	return working_springs
+	if next_char == '#' || next_char == '?' {
+		// We are currently iterating over a group
+		ways += count_resolve_spring_ways(spring, groups, spring_index, group_index, current_group_index+1)
+	}
+
+	// Cache the result
+	cache_resolve_spring[cache_key] = ways
+
+	return ways
 }
 
 func day12_part1() any {
@@ -103,8 +81,8 @@ func day12_part1() any {
 
 	s := 0
 	for _, spring := range springs {
-		working_springs := brute_force_resolve_spring(spring)
-		s += len(working_springs)
+		groups, _ := utils.MapArray(strings.Split(spring[1], ","), func(n string) (int, error) { return strconv.Atoi(n) })
+		s += count_resolve_spring_ways([]rune(spring[0]), groups, 0, 0, 0)
 	}
 
 	return s
