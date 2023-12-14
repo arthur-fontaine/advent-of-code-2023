@@ -57,6 +57,18 @@ func define_play_cycle() {
 	})
 }
 
+var play_1000_cycles func(platform string) string
+
+func define_play_1000_cycles() {
+	play_1000_cycles = utils.Memoize(func(platform string) string {
+		for i := 0; i < 1000; i++ {
+			platform = play_cycle(platform)
+		}
+
+		return platform
+	})
+}
+
 func day14_part2() any {
 	input, err := os.ReadFile("resources/14/input.txt")
 	if err != nil {
@@ -66,10 +78,11 @@ func day14_part2() any {
 
 	define_get_platform_score()
 	define_play_cycle()
+	define_play_1000_cycles()
 
 	platform := string(input)
-	for i := 1; i <= 1_000_000_000; i++ {
-		platform = play_cycle(platform)
+	for i := 1; i <= 1_000_000; i++ {
+		platform = play_1000_cycles(platform)
 	}
 
 	return get_platform_score(platform)
