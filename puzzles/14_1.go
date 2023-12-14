@@ -1,6 +1,7 @@
 package puzzles
 
 import (
+	"arthur-fontaine/advent-of-code-2023/utils"
 	"os"
 	"strings"
 )
@@ -32,16 +33,20 @@ func up_all_rounded_rock(platform string) string {
 	return strings.Join(rows, "\n")
 }
 
-func get_platform_score(platform string) int {
-	score := 0
+var get_platform_score func(platform string) int
 
-	rows := strings.Split(platform, "\n")
+func define_get_platform_score() {
+	get_platform_score = utils.Memoize(func(platform string) int {
+		score := 0
 
-	for i, v := range rows {
-		score += strings.Count(v, "O") * (len(rows) - i)
-	}
+		rows := strings.Split(platform, "\n")
 
-	return score
+		for i, v := range rows {
+			score += strings.Count(v, "O") * (len(rows) - i)
+		}
+
+		return score
+	})
 }
 
 func day14_part1() any {
@@ -50,6 +55,8 @@ func day14_part1() any {
 		panic(err)
 	}
 	input = []byte(strings.Trim(string(input), "\n"))
+
+	define_get_platform_score()
 
 	return get_platform_score(up_all_rounded_rock(string(input)))
 }
