@@ -47,3 +47,21 @@ func ArraysAreSame[V comparable](array_a []V, array_b []V) bool {
 
 	return true
 }
+
+func ReverseArray[V comparable](array []V) []V {
+	reversed_array := make([]V, len(array))
+	for i, v := range array {
+		reversed_array[len(array)-1-i] = v
+	}
+	return reversed_array
+}
+
+func SplitArrayAt[V any](array []V, i int) [][]V {
+	part1 := []V{}
+	part1 = append(part1, array[:i]...)
+
+	part2 := []V{}
+	part2 = append(part2, array[i:]...)
+
+	return [][]V{part1, part2}
+}
